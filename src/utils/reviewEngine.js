@@ -2,9 +2,8 @@
 // Verified 2-3 meaningful sentences, 180-300 characters per review
 // Distinct openings, varied sentence structures, star rating alignment
 
-// Official Direct Review Composer URL (from Google Business Profile: Read reviews -> Get more reviews -> Copy link)
-// Set below when owner provides the link; defaults safely to verified Maps listing
-export const OFFICIAL_REVIEW_COMPOSER_URL = '';
+// Official Direct Review Composer URL (Verified Google Place ID: ChIJ7URhWAv9YjkRNRb2YvsmxBA)
+export const OFFICIAL_REVIEW_COMPOSER_URL = 'https://search.google.com/local/writereview?placeid=ChIJ7URhWAv9YjkRNRb2YvsmxBA';
 
 export const OFFICIAL_GOOGLE_MAPS_FALLBACK = 'https://maps.app.goo.gl/YAN4w9XHaynJMoKf8';
 
