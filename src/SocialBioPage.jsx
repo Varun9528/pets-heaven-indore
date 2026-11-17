@@ -112,6 +112,8 @@ export default function SocialBioPage() {
           alt=""
           className="social-bg-image"
           loading="eager"
+          decoding="sync"
+          fetchPriority="high"
         />
         <div className="social-bg-overlay" />
       </div>
@@ -140,12 +142,17 @@ export default function SocialBioPage() {
             >
               {/* 1. Official Logo inside clean WHITE background container */}
               <div className="social-logo-white-frame">
-                <img
-                  src={OFFICIAL_LOGO}
-                  alt="Pet's Heaven Indore Logo"
-                  className="social-logo-white-img"
-                  loading="eager"
-                />
+                <picture>
+                  <source srcSet="/assets/logo/Vibrant Pets Heaven Logo.webp" type="image/webp" />
+                  <img
+                    src={OFFICIAL_LOGO}
+                    alt="Pet's Heaven Indore Logo"
+                    className="social-logo-white-img"
+                    loading="eager"
+                    decoding="async"
+                    fetchPriority="high"
+                  />
+                </picture>
               </div>
 
               {/* 2. Business Heading & Subtitle */}

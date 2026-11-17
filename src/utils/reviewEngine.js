@@ -2,7 +2,16 @@
 // Verified 2-3 meaningful sentences, 180-300 characters per review
 // Distinct openings, varied sentence structures, star rating alignment
 
-export const OFFICIAL_GOOGLE_REVIEW_URL = 'https://maps.app.goo.gl/YAN4w9XHaynJMoKf8';
+// Official Direct Review Composer URL (from Google Business Profile: Read reviews -> Get more reviews -> Copy link)
+// Set below when owner provides the link; defaults safely to verified Maps listing
+export const OFFICIAL_REVIEW_COMPOSER_URL = '';
+
+export const OFFICIAL_GOOGLE_MAPS_FALLBACK = 'https://maps.app.goo.gl/YAN4w9XHaynJMoKf8';
+
+export const OFFICIAL_GOOGLE_REVIEW_URL =
+  OFFICIAL_REVIEW_COMPOSER_URL && OFFICIAL_REVIEW_COMPOSER_URL.trim().length > 0
+    ? OFFICIAL_REVIEW_COMPOSER_URL.trim()
+    : OFFICIAL_GOOGLE_MAPS_FALLBACK;
 
 export const PRODUCT_OPTIONS = [
   { id: 'dogs', label: 'Dogs & Breeds', icon: '🐕' },

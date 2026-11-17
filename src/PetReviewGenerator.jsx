@@ -87,35 +87,41 @@ export default function PetReviewGenerator({ onBack }) {
     }
   };
 
-  // Copy exact review and handoff to verified Google Review destination
-  const handleContinueToGoogle = async () => {
+  // Copy exact review and handoff to verified Google Review destination (synchronous & popup-safe)
+  const handleContinueToGoogle = () => {
     setCopied(true);
     setHandoffActive(true);
 
-    // Copy exact review text to clipboard
+    // 1. Copy exact review text to clipboard
     try {
       if (navigator?.clipboard?.writeText) {
-        await navigator.clipboard.writeText(selectedReviewText);
-      } else {
-        const tempTextArea = document.createElement('textarea');
-        tempTextArea.value = selectedReviewText;
-        document.body.appendChild(tempTextArea);
-        tempTextArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(tempTextArea);
+        navigator.clipboard.writeText(selectedReviewText).catch(() => {});
       }
-    } catch (err) {
-      console.warn('Clipboard write fallback:', err);
-    }
+    } catch (err) {}
 
-    // Open verified Google Maps review destination
-    setTimeout(() => {
-      try {
-        window.open(OFFICIAL_GOOGLE_REVIEW_URL, '_blank', 'noopener,noreferrer');
-      } catch (e) {
+    // Fallback copy using hidden textarea
+    try {
+      const tempTextArea = document.createElement('textarea');
+      tempTextArea.value = selectedReviewText;
+      tempTextArea.style.position = 'fixed';
+      tempTextArea.style.left = '-9999px';
+      tempTextArea.style.top = '-9999px';
+      tempTextArea.setAttribute('readonly', '');
+      document.body.appendChild(tempTextArea);
+      tempTextArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempTextArea);
+    } catch (err) {}
+
+    // 2. Open verified Google Maps review destination synchronously in the direct user click gesture
+    try {
+      const win = window.open(OFFICIAL_GOOGLE_REVIEW_URL, '_blank', 'noopener,noreferrer');
+      if (!win) {
         window.location.href = OFFICIAL_GOOGLE_REVIEW_URL;
       }
-    }, 600);
+    } catch (e) {
+      window.location.href = OFFICIAL_GOOGLE_REVIEW_URL;
+    }
   };
 
   return (
@@ -135,11 +141,17 @@ export default function PetReviewGenerator({ onBack }) {
         {/* Brand Header */}
         <div className="review-brand-header">
           <div className="social-logo-white-frame review-logo-frame">
-            <img
-              src={OFFICIAL_LOGO}
-              alt="Pet's Heaven Indore Logo"
-              className="social-logo-white-img"
-            />
+            <picture>
+              <source srcSet="/assets/logo/Vibrant Pets Heaven Logo.webp" type="image/webp" />
+              <img
+                src={OFFICIAL_LOGO}
+                alt="Pet's Heaven Indore Logo"
+                className="social-logo-white-img"
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
+              />
+            </picture>
           </div>
           <h2 className="review-title">PET'S HEAVEN INDORE</h2>
           <p className="review-subtitle">

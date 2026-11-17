@@ -38,11 +38,17 @@ function Nav() {
     <header className="nav-shell">
       <a className="pets-nav-brand" href="#home" aria-label="Pet's Heaven Indore Home">
         <div className="pets-logo-white-card pets-logo-nav-frame">
-          <img
-            src={OFFICIAL_LOGO}
-            alt="Pet's Heaven Indore Logo"
-            className="pets-nav-logo-thumb"
-          />
+          <picture>
+            <source srcSet="/assets/logo/Vibrant Pets Heaven Logo.webp" type="image/webp" />
+            <img
+              src={OFFICIAL_LOGO}
+              alt="Pet's Heaven Indore Logo"
+              className="pets-nav-logo-thumb"
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+            />
+          </picture>
         </div>
       </a>
 
@@ -67,8 +73,16 @@ function HeroPanel({ onSelectCategory, selectedCategory }) {
   const videoRef = useRef(null);
 
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.play().catch(() => {});
+    // Progressive non-blocking video start after initial frame paint
+    const playVideo = () => {
+      if (videoRef.current) {
+        videoRef.current.play().catch(() => {});
+      }
+    };
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(playVideo);
+    } else {
+      setTimeout(playVideo, 150);
     }
   }, []);
 
@@ -81,6 +95,8 @@ function HeroPanel({ onSelectCategory, selectedCategory }) {
           alt=""
           className="hero-cinematic-poster"
           loading="eager"
+          decoding="sync"
+          fetchPriority="high"
         />
         <video
           ref={videoRef}
@@ -89,9 +105,10 @@ function HeroPanel({ onSelectCategory, selectedCategory }) {
           muted
           loop
           playsInline
-          preload="auto"
+          preload="none"
           poster="/assets/pets/cinematic_hero_banner.jpg"
         >
+          <source src="/assets/video/pets_cinematic_hero.webm" type="video/webm" />
           <source src="/assets/video/Feeding Time Closeup.mp4" type="video/mp4" />
           <source src="/assets/video/Maintenance Routine.mp4" type="video/mp4" />
         </video>
@@ -105,11 +122,17 @@ function HeroPanel({ onSelectCategory, selectedCategory }) {
       <div className="hero-copy">
         <div className="pets-hero-logo-box">
           <div className="pets-logo-white-card pets-logo-hero-frame">
-            <img
-              src={OFFICIAL_LOGO}
-              alt="Pet's Heaven Indore Logo"
-              className="pets-hero-logo-img"
-            />
+            <picture>
+              <source srcSet="/assets/logo/Vibrant Pets Heaven Logo.webp" type="image/webp" />
+              <img
+                src={OFFICIAL_LOGO}
+                alt="Pet's Heaven Indore Logo"
+                className="pets-hero-logo-img"
+                loading="eager"
+                decoding="sync"
+                fetchPriority="high"
+              />
+            </picture>
           </div>
         </div>
 
@@ -181,8 +204,9 @@ function CatalogNotice() {
   );
 }
 
-function ProductCard({ product, onOpenModal }) {
+function ProductCard({ product, onOpenModal, index = 0 }) {
   const whatsappUrl = getWhatsAppUrl(product.name);
+  const isAboveFold = index < 4;
 
   return (
     <article className="pets-product-card" id={`pet-${product.id}`}>
@@ -195,8 +219,9 @@ function ProductCard({ product, onOpenModal }) {
         <img
           src={product.image}
           alt={product.name}
-          loading="eager"
-          decoding="sync"
+          loading={isAboveFold ? "eager" : "lazy"}
+          decoding={isAboveFold ? "sync" : "async"}
+          fetchPriority={isAboveFold ? "high" : "low"}
           onError={(e) => {
             if (product.fallbackImage && e.target.src !== product.fallbackImage) {
               e.target.src = product.fallbackImage;
@@ -433,8 +458,8 @@ function MainCatalogSection({ onOpenModal }) {
         </div>
       ) : (
         <div id="main-catalog-grid" className="fish-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '14px', marginTop: '16px' }}>
-          {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} onOpenModal={onOpenModal} />
+          {filteredProducts.map((product, idx) => (
+            <ProductCard key={product.id} product={product} index={idx} onOpenModal={onOpenModal} />
           ))}
         </div>
       )}
@@ -627,8 +652,8 @@ function CategoryShowcaseSection({ id, title, subtitle, categoryKey, onOpenModal
       </div>
 
       <div className="fish-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: '14px', marginTop: '16px' }}>
-        {items.map((product) => (
-          <ProductCard key={product.id} product={product} onOpenModal={onOpenModal} />
+        {items.map((product, idx) => (
+          <ProductCard key={product.id} product={product} index={idx} onOpenModal={onOpenModal} />
         ))}
       </div>
     </section>

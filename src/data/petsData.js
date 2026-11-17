@@ -2,7 +2,7 @@ export const OFFICIAL_PHONE = '+91 88780 02071';
 export const OFFICIAL_WHATSAPP_NUMBER = '918878002071';
 export const OFFICIAL_INSTAGRAM = 'https://www.instagram.com/indore_pets_heaven?vrfl=N3p2Z2FrcDEwZDI=';
 export const OFFICIAL_MAPS = 'https://maps.app.goo.gl/YAN4w9XHaynJMoKf8';
-export const OFFICIAL_WEBSITE = 'https://aquarium-lilac.vercel.app/';
+export const OFFICIAL_WEBSITE = 'https://pets-heaven-indore.vercel.app/';
 export const OFFICIAL_LOGO = '/assets/logo/Vibrant Pets Heaven Logo.png';
 
 export function getWhatsAppUrl(productName) {
