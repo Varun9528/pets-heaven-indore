@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { OFFICIAL_LOGO } from './data/petsData.js';
 import {
@@ -18,10 +18,11 @@ export {
 };
 
 export default function PetReviewGenerator({ onBack }) {
-  const [rating, setRating] = useState(5);
+  // Fresh clean state on every page load - NO pre-selected options or auto-generated reviews
+  const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
-  const [selectedProducts, setSelectedProducts] = useState(['dogs', 'cats']);
-  const [selectedExperiences, setSelectedExperiences] = useState(['quality', 'guidance']);
+  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [selectedExperiences, setSelectedExperiences] = useState([]);
   const [customNote, setCustomNote] = useState('');
   const [hasGenerated, setHasGenerated] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
@@ -29,25 +30,31 @@ export default function PetReviewGenerator({ onBack }) {
   const [selectedReviewText, setSelectedReviewText] = useState('');
   const [copied, setCopied] = useState(false);
   const [handoffActive, setHandoffActive] = useState(false);
+  const [validationMsg, setValidationMsg] = useState('');
 
   const carouselRef = useRef(null);
 
   // Toggle multi-select products
   const toggleProduct = (id) => {
     setSelectedProducts((prev) =>
-      prev.includes(id) ? (prev.length > 1 ? prev.filter((x) => x !== id) : prev) : [...prev, id]
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
   };
 
   // Toggle multi-select experience tags
   const toggleExperience = (id) => {
     setSelectedExperiences((prev) =>
-      prev.includes(id) ? (prev.length > 1 ? prev.filter((x) => x !== id) : prev) : [...prev, id]
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
   };
 
-  // Generate 6 suggestions
+  // Generate 6 suggestions when customer initiates
   const handleGenerate = () => {
+    if (rating === 0) {
+      setValidationMsg('Please select your star rating (1–5) above to generate your review.');
+      return;
+    }
+    setValidationMsg('');
     const chosenProds = PRODUCT_OPTIONS.filter((p) => selectedProducts.includes(p.id));
     const chosenExps = EXPERIENCE_OPTIONS.filter((e) => selectedExperiences.includes(e.id));
     const results = generateVariations(rating, chosenProds, chosenExps, customNote);
@@ -56,6 +63,7 @@ export default function PetReviewGenerator({ onBack }) {
     setSelectedReviewText(results[0]?.text || '');
     setHasGenerated(true);
     setCopied(false);
+    setHandoffActive(false);
   };
 
   // Pick suggestion from carousel
@@ -79,7 +87,7 @@ export default function PetReviewGenerator({ onBack }) {
     }
   };
 
-  // Copy and handoff to verified Google Review destination
+  // Copy exact review and handoff to verified Google Review destination
   const handleContinueToGoogle = async () => {
     setCopied(true);
     setHandoffActive(true);
@@ -109,11 +117,6 @@ export default function PetReviewGenerator({ onBack }) {
       }
     }, 600);
   };
-
-  // Initial generation on first mount
-  useEffect(() => {
-    handleGenerate();
-  }, []);
 
   return (
     <div className="pet-review-wrapper">
@@ -147,7 +150,10 @@ export default function PetReviewGenerator({ onBack }) {
         {/* 1. Star Rating Selector */}
         <div className="review-section-block">
           <label className="review-field-label">
-            Your Rating <span className="review-label-hint">({rating} of 5 Stars)</span>
+            Your Rating{' '}
+            <span className="review-label-hint">
+              {rating > 0 ? `(${rating} of 5 Stars)` : '(Select 1 to 5 Stars)'}
+            </span>
           </label>
           <div className="star-rating-row" role="radiogroup" aria-label="Star Rating">
             {[1, 2, 3, 4, 5].map((star) => {
@@ -159,7 +165,10 @@ export default function PetReviewGenerator({ onBack }) {
                   className={`star-btn ${active ? 'active' : ''}`}
                   onMouseEnter={() => setHoverRating(star)}
                   onMouseLeave={() => setHoverRating(0)}
-                  onClick={() => setRating(star)}
+                  onClick={() => {
+                    setRating(star);
+                    setValidationMsg('');
+                  }}
                   aria-label={`${star} Star${star > 1 ? 's' : ''}`}
                 >
                   ★
@@ -228,6 +237,22 @@ export default function PetReviewGenerator({ onBack }) {
           />
         </div>
 
+        {/* Validation Warning if stars not chosen */}
+        {validationMsg && (
+          <div style={{
+            background: 'rgba(255, 107, 107, 0.15)',
+            border: '1px solid rgba(255, 107, 107, 0.5)',
+            color: '#ff8a8a',
+            padding: '10px 14px',
+            borderRadius: '8px',
+            fontSize: '13px',
+            textAlign: 'center',
+            marginBottom: '14px'
+          }}>
+            ⚠️ {validationMsg}
+          </div>
+        )}
+
         {/* Generate Button */}
         <div className="review-action-row">
           <button
@@ -239,7 +264,7 @@ export default function PetReviewGenerator({ onBack }) {
           </button>
         </div>
 
-        {/* 5. Suggestions Carousel Section */}
+        {/* 5. Suggestions Carousel Section (Rendered only after customer clicks Generate) */}
         {hasGenerated && suggestions.length > 0 && (
           <div className="review-suggestions-container">
             <div className="suggestions-header-row">
